@@ -3,20 +3,24 @@ import axios from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBasketballBall,
-  faFootballBall,
+  faFutbol,
   faBaseball,
   faTableTennis,
   faTable,
   faChess,
   faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
+import badminton from "../assets/reshot-icon-badminton-RXYNAQ749M.svg";
 import Header from "./Header";
+import { useSelector, useDispatch } from "react-redux";
 import { Dialog } from "@headlessui/react";
+import { setLobbies } from "../redux/LobbySlice.js";
+import { setSports } from "../redux/sportsSlice.js";
 
 // Mapping sport names to FontAwesome icons
 const sportIcons = {
   basketball: faBasketballBall,
-  football: faFootballBall,
+  football: faFutbol,
   cricket: faBaseball,
   tennis: faTableTennis,
   "table tennis": faTableTennis,
@@ -26,7 +30,7 @@ const sportIcons = {
   badminton: faTable,
 };
 
-const Card = ({ sport, currSize, maxSize }) => (
+const Card = ({ lobbyid, sport, currSize, maxSize }) => (
   <div className="group relative cursor-pointer overflow-hidden bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl sm:mx-auto sm:max-w-sm sm:rounded-lg sm:px-10">
     <span className="absolute top-10 z-0 h-20 w-20 rounded-full bg-sky-500 transition-all duration-300 group-hover:scale-[10]"></span>
     <div className="relative z-10 mx-auto max-w-md">
@@ -45,7 +49,7 @@ const Card = ({ sport, currSize, maxSize }) => (
       <div className="pt-5 text-base font-semibold leading-7">
         <p>
           <a
-            href="#"
+            href={`/lobbies/${lobbyid}`}
             className="text-sky-500 transition-all duration-300 group-hover:text-white"
           >
             Know more &rarr;
@@ -57,13 +61,15 @@ const Card = ({ sport, currSize, maxSize }) => (
 );
 
 const App = () => {
-  const [lobbies, setLobbies] = useState([]);
   const [sportsMap, setSportsMap] = useState({});
   const [filteredLobbies, setFilteredLobbies] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [newLobby, setNewLobby] = useState({ sport: "", maxSize: "" });
   const [errors, setErrors] = useState([]);
+  const dispatch = useDispatch();
+  const { lobbies } = useSelector((state) => state.lobby);
+  const { sports } = useSelector((state) => state.sports);
 
   const fetchSports = async () => {
     try {
@@ -73,15 +79,18 @@ const App = () => {
         return acc;
       }, {});
       setSportsMap(sportsData);
+      dispatch(setSports(response.data));
     } catch (error) {
       console.error("Error fetching sports:", error);
     }
   };
+  console.log(sports);
 
   const fetchLobbies = async () => {
     try {
       const response = await axios.get("/lobbies/getactive");
-      setLobbies(response.data);
+      //   setLobbies(response.data);
+      dispatch(setLobbies(response.data));
       setFilteredLobbies(response.data); // Initially show all lobbies
     } catch (error) {
       console.error("Error fetching active lobbies:", error);
@@ -144,155 +153,6 @@ const App = () => {
       setErrors(["Error creating lobby. Please try again."]);
     }
   };
-
-  //   return (
-  //     <div>
-  //       <Header />
-  //       <div className="p-4 bg-white shadow-md rounded-lg">
-  //         <h1 className="text-2xl font-bold mb-4">Lobbies Available</h1>
-  //         <button
-  //           onClick={openCreateDialog}
-  //           className="bg-green-500 text-white px-4 py-2 rounded mr-4"
-  //         >
-  //           Create a Lobby
-  //         </button>
-  //         <button
-  //           onClick={openFilterDialog}
-  //           className="bg-blue-500 text-white px-4 py-2 rounded"
-  //         >
-  //           Filter Sports
-  //         </button>
-  //       </div>
-
-  //       {/* Filter Sports Dialog */}
-  //       <Dialog
-  //         open={isFilterOpen}
-  //         onClose={closeFilterDialog}
-  //         className="relative z-50"
-  //       >
-  //         <div className="fixed inset-0 bg-black bg-opacity-30" />
-  //         <div className="fixed inset-0 flex items-center justify-center p-4">
-  //           <Dialog.Panel className="mx-auto w-full max-w-md rounded bg-white p-4">
-  //             <Dialog.Title className="text-lg font-bold">
-  //               Select Sport
-  //             </Dialog.Title>
-  //             <div className="mt-4 space-y-4 overflow-y-auto max-h-96">
-  //               {Object.entries(sportsMap).map(([id, name]) => (
-  //                 <div
-  //                   key={id}
-  //                   className="flex items-center justify-between p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
-  //                   onClick={() => filterLobbies(name)}
-  //                 >
-  //                   <div className="flex items-center">
-  //                     <FontAwesomeIcon
-  //                       icon={sportIcons[name]}
-  //                       className="h-6 w-6 text-gray-700 mr-2"
-  //                     />
-  //                     <span className="font-semibold">{name.toUpperCase()}</span>
-  //                   </div>
-  //                 </div>
-  //               ))}
-  //             </div>
-  //             <button
-  //               onClick={closeFilterDialog}
-  //               className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-  //             >
-  //               Cancel
-  //             </button>
-  //             <button
-  //               onClick={() => setFilteredLobbies(lobbies)}
-  //               className="mt-4 ml-4 bg-yellow-500 text-white px-4 py-2 rounded"
-  //             >
-  //               Remove Filters
-  //             </button>
-  //           </Dialog.Panel>
-  //         </div>
-  //       </Dialog>
-
-  //       {/* Create Lobby Dialog */}
-  //       <Dialog
-  //         open={isCreateOpen}
-  //         onClose={closeCreateDialog}
-  //         className="relative z-50"
-  //       >
-  //         <div className="fixed inset-0 bg-black bg-opacity-30" />
-  //         <div className="fixed inset-0 flex items-center justify-center p-4">
-  //           <Dialog.Panel className="mx-auto w-full max-w-md rounded bg-white p-4">
-  //             <Dialog.Title className="text-lg font-bold">
-  //               Create a Lobby
-  //             </Dialog.Title>
-  //             <div className="mt-4 space-y-4">
-  //               {errors.length > 0 && (
-  //                 <div
-  //                   className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-  //                   role="alert"
-  //                 >
-  //                   <FontAwesomeIcon
-  //                     icon={faExclamationCircle}
-  //                     className="mr-2"
-  //                   />
-  //                   {errors.map((error, index) => (
-  //                     <p key={index}>{error}</p>
-  //                   ))}
-  //                 </div>
-  //               )}
-  //               <div className="flex flex-col">
-  //                 <label className="font-semibold">Sport</label>
-  //                 <select
-  //                   value={newLobby.sport}
-  //                   onChange={(e) =>
-  //                     setNewLobby({ ...newLobby, sport: e.target.value })
-  //                   }
-  //                   className="border border-gray-300 rounded px-2 py-1"
-  //                 >
-  //                   <option value="">Select Sport</option>
-  //                   {Object.values(sportsMap).map((name) => (
-  //                     <option key={name} value={name}>
-  //                       {name.toUpperCase()}
-  //                     </option>
-  //                   ))}
-  //                 </select>
-  //               </div>
-  //               <div className="flex flex-col">
-  //                 <label className="font-semibold">Maximum Size</label>
-  //                 <input
-  //                   type="number"
-  //                   value={newLobby.maxSize}
-  //                   onChange={(e) =>
-  //                     setNewLobby({ ...newLobby, maxSize: e.target.value })
-  //                   }
-  //                   className="border border-gray-300 rounded px-2 py-1"
-  //                 />
-  //               </div>
-  //               <button
-  //                 onClick={createLobby}
-  //                 className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-  //               >
-  //                 Create
-  //               </button>
-  //               <button
-  //                 onClick={closeCreateDialog}
-  //                 className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
-  //               >
-  //                 Cancel
-  //               </button>
-  //             </div>
-  //           </Dialog.Panel>
-  //         </div>
-  //       </Dialog>
-
-  //       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
-  //         {filteredLobbies.map((lobby) => (
-  //           <Card
-  //             key={lobby.id}
-  //             sport={sportsMap[lobby.sportid]}
-  //             currSize={lobby.currentsize}
-  //             maxSize={lobby.maxsize}
-  //           />
-  //         ))}
-  //       </div>
-  //     </div>
-  //   );
   return (
     <div>
       <Header />
@@ -446,7 +306,8 @@ const App = () => {
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-4">
         {filteredLobbies.map((lobby) => (
           <Card
-            key={lobby.id}
+            key={lobby.lobbyid}
+            lobbyid={lobby.lobbyid}
             sport={sportsMap[lobby.sportid]}
             currSize={lobby.currentsize}
             maxSize={lobby.maxsize}
