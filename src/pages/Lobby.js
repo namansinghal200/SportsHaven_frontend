@@ -4,9 +4,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBasketballBall,
-  faFootballBall,
-  faBaseball,
   faTableTennis,
   faTable,
   faChess,
@@ -15,18 +12,22 @@ import {
 import badminton from "../assets/reshot-icon-badminton-RXYNAQ749M.svg";
 import cricket from "../assets/reshot-icon-cricket-M2EUHT437N.svg";
 import football from "../assets/reshot-icon-football-VRDHMFPCS4.svg";
-import basketball from "../assets/reshot-icon-basketball-H9K4Q5MZPR.svg";
+import basketball from "../assets/reshot-icon-basketball-LD4KY59N6A.svg";
+import chess from "../assets/reshot-icon-chess-8LDNJZTBAM.svg";
+import tabletennis from "../assets/table-tennis.png";
+import squash from "../assets/squash.png";
+import tennis from "../assets/reshot-icon-tennis-SGW93DHACU.svg";
 import { Dialog } from "@headlessui/react";
 
 const sportIcons = {
   basketball: basketball,
   football: football,
   cricket: cricket,
-  tennis: faTableTennis,
-  "table tennis": faTableTennis,
-  squash: faTable,
+  tennis: tennis,
+  "table tennis": tabletennis,
+  squash: squash,
   carrom: faChess,
-  chess: faChess,
+  chess: chess,
   badminton: badminton,
 };
 
