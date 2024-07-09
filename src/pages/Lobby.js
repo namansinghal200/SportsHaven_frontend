@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "../services/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +10,7 @@ import {
   faTableTennis,
   faTable,
   faChess,
+  faExclamationCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import badminton from "../assets/reshot-icon-badminton-RXYNAQ749M.svg";
 import cricket from "../assets/reshot-icon-cricket-M2EUHT437N.svg";
@@ -31,6 +31,7 @@ const sportIcons = {
 };
 
 const DetailedLobbyCard = () => {
+  const { user } = useSelector((state) => state.user.user);
   const { lobbyid } = useParams();
   const navigate = useNavigate();
   const { lobbies } = useSelector((state) => state.lobby);
@@ -39,10 +40,14 @@ const DetailedLobbyCard = () => {
   const sport = sports.find((sport) => sport.sportid === lobby.sportid);
 
   const [isJoinDialogOpen, setIsJoinDialogOpen] = useState(false);
+  const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [users, setUsers] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const openJoinDialog = () => setIsJoinDialogOpen(true);
   const closeJoinDialog = () => setIsJoinDialogOpen(false);
+  const openErrorDialog = () => setIsErrorDialogOpen(true);
+  const closeErrorDialog = () => setIsErrorDialogOpen(false);
 
   const fetchLobbyUsers = async () => {
     try {
@@ -73,6 +78,12 @@ const DetailedLobbyCard = () => {
       navigate("/home");
     } catch (error) {
       console.error("Error joining lobby:", error);
+      if (error.response.status === 400) {
+        setErrorMessage("Can't join! You are already in a lobby.");
+      } else {
+        setErrorMessage("Error joining the lobby. Please try again.");
+      }
+      openErrorDialog();
     }
   };
 
@@ -186,6 +197,39 @@ const DetailedLobbyCard = () => {
                 className="bg-gray-500 text-white px-4 py-2 rounded"
               >
                 No
+              </button>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      <Dialog open={isErrorDialogOpen} onClose={closeErrorDialog}>
+        <div className="fixed inset-0 bg-black bg-opacity-30" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="mx-auto max-w-md rounded bg-white p-6 shadow-lg">
+            <Dialog.Title className="flex items-center text-lg font-bold text-red-600">
+              <FontAwesomeIcon icon={faExclamationCircle} className="mr-2" />
+              Error
+            </Dialog.Title>
+            <div className="mt-4">
+              <p>{errorMessage}</p>
+            </div>
+            <div className="flex justify-end mt-4 space-x-4">
+              <button
+                onClick={() => {
+                  navigate(`/lobbies/${user.currentlobby}`);
+                  closeErrorDialog();
+                  closeJoinDialog();
+                }}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                My Lobby
+              </button>
+              <button
+                onClick={closeErrorDialog}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Close
               </button>
             </div>
           </Dialog.Panel>

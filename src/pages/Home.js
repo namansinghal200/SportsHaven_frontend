@@ -42,7 +42,7 @@ const Card = ({ lobbyid, sport, currSize, maxSize }) => (
       </span>
       <div className="space-y-6 pt-5 text-base leading-7 text-gray-600 transition-all duration-300 group-hover:text-white/90">
         <p className="font-bold text-lg">{sport.toUpperCase()}</p>
-        <p className="bg-white px-2 py-1 rounded text-gray-700 transition-all duration-300 group-hover:bg-sky-400 group-hover:text-white">
+        <p className="bg-white px-2 py-1 rounded text-gray-700 transition-all  duration-300 group-hover:bg-sky-400 group-hover:text-white">
           {currSize}/{maxSize}
         </p>
       </div>
@@ -84,7 +84,6 @@ const App = () => {
       console.error("Error fetching sports:", error);
     }
   };
-  console.log(sports);
 
   const fetchLobbies = async () => {
     try {
@@ -150,7 +149,11 @@ const App = () => {
       setIsCreateOpen(false);
       setNewLobby({ sport: "", maxSize: "" });
     } catch (error) {
-      setErrors(["Error creating lobby. Please try again."]);
+      if (error.response.status === 400) {
+        setErrors(["User is already in a lobby."]);
+      } else {
+        setErrors(["Error creating lobby. Please try again."]);
+      }
     }
   };
   return (
@@ -268,9 +271,15 @@ const App = () => {
                   className="border border-gray-300 rounded px-2 py-1"
                 >
                   <option value="">Select Sport</option>
-                  {Object.values(sportsMap).map((name) => (
+                  {/* {Object.values(sportsMap).map((name) => (
                     <option key={name} value={name}>
                       {name.toUpperCase()}
+                    </option>
+                  ))} */}
+                  {sports.map((sport) => (
+                    <option key={sport.sportid} value={sport.name}>
+                      {sport.name.toUpperCase()} (
+                      {sport.maxsize - sport.currentsize} spots left)
                     </option>
                   ))}
                 </select>

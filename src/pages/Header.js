@@ -43,6 +43,14 @@ const Header = () => {
     };
   }, []);
 
+  const handleClick = () => {
+    if (user.activelobby) {
+      navigate(`/lobbies/${user.currentlobby}`);
+    } else {
+      navigate("/no-active-lobby");
+    }
+  };
+
   return (
     <header className="flex border-b py-4 px-4 sm:px-10 bg-white font-[sans-serif] min-h-[70px] tracking-wide relative z-50">
       <div className="flex flex-wrap items-center gap-5 w-full">
@@ -90,12 +98,12 @@ const Header = () => {
               </a>
             </li>
             <li className="max-lg:border-b max-lg:py-3 px-3">
-              <a
-                href="javascript:void(0)"
+              <button
+                onClick={handleClick}
                 className="lg:hover:text-[#007bff] text-gray-500 block font-semibold text-[15px]"
               >
-                Active Match
-              </a>
+                Active Lobby
+              </button>
             </li>
             <li className="max-lg:border-b max-lg:py-3 px-3">
               <a
