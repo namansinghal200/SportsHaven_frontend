@@ -31,11 +31,13 @@ const ProfilePage = () => {
   const [won, setWon] = useState([]);
   const [lost, setLost] = useState([]);
   const [updatedLobbies, setUpdatedLobbies] = useState([]);
+  const [showMore, setShowMore] = useState({}); // State to manage "more" clicks
   const { sports } = useSelector((state) => state.sports);
   const sportsMap = sports.reduce((acc, sport) => {
     acc[sport.sportid] = sport.name;
     return acc;
   }, {});
+
   // Fetch user information
   const fetchUser = async () => {
     try {
@@ -94,6 +96,10 @@ const ProfilePage = () => {
     }
   }, [won, lost]);
 
+  const handleShowMore = (lobbyid) => {
+    setShowMore((prev) => ({ ...prev, [lobbyid]: !prev[lobbyid] }));
+  };
+
   if (!user) {
     return <div>Loading...</div>; // Optional: add a loading state
   }
@@ -102,6 +108,11 @@ const ProfilePage = () => {
     <div className="min-h-screen bg-gray-100">
       <Header />
       <div className="container mx-auto px-4 py-8">
+        {/* Profile Heading */}
+        <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
+          {username}'s Profile
+        </h1>
+
         {/* Stat Cards */}
         <div className="mb-6 grid gap-6 sm:grid-cols-3">
           <div className="flex items-center justify-between p-6 bg-gray-900 rounded-lg text-white">
@@ -190,31 +201,43 @@ const ProfilePage = () => {
           {updatedLobbies.map((lobby) => (
             <div
               key={lobby.lobbyid}
-              className={`py-8 px-8 w-full rounded-xl shadow-lg space-y-2 sm:py-6 sm:flex sm:items-center sm:space-y-0 sm:space-x-6 ${
-                won.includes(lobby.lobbyid) ? "bg-green-500" : "bg-red-500"
+              className={`py-8 px-8 w-full rounded-xl shadow-lg space-y-4 sm:py-6 sm:flex sm:items-center sm:space-y-0 sm:space-x-6 ${
+                won.includes(lobby.lobbyid) ? "bg-green-600" : "bg-red-600"
               }`}
             >
               <img
-                className="block mx-auto h-24 w-24 rounded-full sm:mx-0 sm:shrink-0 bg-gray-200"
+                className="block mx-auto h-24 w-24 rounded-full sm:mx-0 sm:shrink-0 bg-gray-300"
                 src={sportIcons[sportsMap[lobby.sportid]]}
                 alt={sportsMap[lobby.sportid]}
               />
-              <div className="text-center space-y-2 sm:text-left">
-                <div className="space-y-0.5">
+              <div className="text-center space-y-4 sm:text-left">
+                <div className="space-y-2">
                   <p className="text-lg text-white font-semibold">
                     {sportsMap[lobby.sportid].toUpperCase()}
                   </p>
-                  <p className="text-slate-100 font-medium">{lobby.winner}</p>
+                  <p className="text-slate-100 font-medium">
+                    {showMore[lobby.lobbyid]
+                      ? lobby.winner
+                      : `${lobby.winner.slice(0, 20)}`}
+                    {lobby.winner.length > 20 && (
+                      <button
+                        onClick={() => handleShowMore(lobby.lobbyid)}
+                        className="text-slate-100 underline ml-1"
+                      >
+                        {showMore[lobby.lobbyid] ? "...less" : "...more"}
+                      </button>
+                    )}
+                  </p>
+                  <p
+                    className={`px-4 py-1 text-sm w-24 text-center ${
+                      won.includes(lobby.lobbyid)
+                        ? "text-green-800"
+                        : "text-red-800"
+                    } font-bold rounded-full border border-transparent bg-gray-200`}
+                  >
+                    {lobby.score}
+                  </p>
                 </div>
-                <p
-                  className={`px-4 py-1 text-sm ${
-                    won.includes(lobby.lobbyid)
-                      ? "text-green-700"
-                      : "text-red-700"
-                  } font-semibold rounded-full border border-transparent bg-gray-200`}
-                >
-                  {lobby.score}
-                </p>
               </div>
             </div>
           ))}
