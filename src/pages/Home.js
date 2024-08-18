@@ -160,15 +160,19 @@ const App = () => {
 
     try {
       await axios.post("/lobbies", { sportid: sportId, maxsize: maxSize });
+      fetchLobbies();
+      fetchUser();
       setErrors([]);
       setIsCreateOpen(false);
       setNewLobby({ sport: "", maxSize: "" });
     } catch (error) {
-      if (error.response.status === 400) {
-        setErrors(["User is already in a lobby."]);
-      } else {
-        setErrors(["Error creating lobby. Please try again."]);
-      }
+      console.log(error.response.data.message);
+      setErrors([error.response.data.message]);
+      // if (error.response.status === 400) {
+      //   setErrors(["User is already in a lobby."]);
+      // } else {
+      //   setErrors(["Error creating lobby. Please try again."]);
+      // }
     }
   };
   return (
