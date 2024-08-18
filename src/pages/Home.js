@@ -9,6 +9,8 @@ import {
   faTable,
   faChess,
   faExclamationCircle,
+  faVolleyball,
+  faRunning,
 } from "@fortawesome/free-solid-svg-icons";
 import badminton from "../assets/reshot-icon-badminton-RXYNAQ749M.svg";
 import Header from "./Header";
@@ -24,12 +26,9 @@ const sportIcons = {
   Basketball: faBasketballBall,
   Football: faFutbol,
   Cricket: faBaseball,
-  Tennis: faTableTennis,
   "Table Tennis": faTableTennis,
-  Squash: faTable,
-  Carrom: faChess,
   Chess: faChess,
-  Badminton: faTable,
+  Volleyball: faVolleyball,
 };
 
 const Card = ({ lobbyid, sport, currSize, maxSize }) => (
@@ -229,7 +228,7 @@ const App = () => {
                 >
                   <div className="flex items-center">
                     <FontAwesomeIcon
-                      icon={sportIcons[name]}
+                      icon={sportIcons[name] ? sportIcons[name] : faRunning}
                       className="h-6 w-6 text-gray-700 mr-2"
                     />
                     <span className="font-semibold">{name.toUpperCase()}</span>

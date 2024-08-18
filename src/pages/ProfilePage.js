@@ -11,6 +11,7 @@ import chess from "../assets/reshot-icon-chess-8LDNJZTBAM.svg";
 import tabletennis from "../assets/table-tennis.png";
 import squash from "../assets/squash.png";
 import tennis from "../assets/reshot-icon-tennis-SGW93DHACU.svg";
+import volleyball from "../assets/reshot-icon-volleyball-GPN3QHDSUC.svg";
 import { ReactComponent as Played } from "../assets/stadium-svgrepo-com.svg";
 import { ReactComponent as Medal } from "../assets/medal-sports-and-competition-svgrepo-com.svg";
 
@@ -24,6 +25,7 @@ const ProfilePage = () => {
     Squash: squash,
     Chess: chess,
     Badminton: badminton,
+    Volleyball: volleyball,
   };
   const navigate = useNavigate();
   const { username } = useParams();

@@ -11,6 +11,7 @@ import {
   faRightToBracket,
   faCircle,
   faPlus,
+  faVolleyball,
 } from "@fortawesome/free-solid-svg-icons";
 import badminton from "../assets/reshot-icon-badminton-RXYNAQ749M.svg";
 import cricket from "../assets/reshot-icon-cricket-M2EUHT437N.svg";
@@ -20,6 +21,7 @@ import chess from "../assets/reshot-icon-chess-8LDNJZTBAM.svg";
 import tabletennis from "../assets/table-tennis.png";
 import squash from "../assets/squash.png";
 import tennis from "../assets/reshot-icon-tennis-SGW93DHACU.svg";
+import volleyball from "../assets/reshot-icon-volleyball-GPN3QHDSUC.svg";
 import { Dialog } from "@headlessui/react";
 import { updateUser } from "../redux/UserSlice";
 import NoActiveLobby from "./NoActiveLobby";
@@ -34,6 +36,7 @@ const sportIcons = {
   Carrom: faChess,
   Chess: chess,
   Badminton: badminton,
+  volleyball: volleyball,
 };
 
 const DetailedLobbyCard = ({ type }) => {
@@ -183,7 +186,7 @@ const DetailedLobbyCard = ({ type }) => {
       closeConcludeDialog();
       navigate("/home");
     } catch (error) {
-      setErrorMessage("Unexpected Error, Try Again!");
+      setErrorMessage(error.response.data.message);
       openErrorDialog();
     }
   };
