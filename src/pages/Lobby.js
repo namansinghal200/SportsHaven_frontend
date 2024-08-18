@@ -46,7 +46,6 @@ const DetailedLobbyCard = ({ type }) => {
   const lobby =
     lobbies.find((lobby) => lobby.lobbyid === parseInt(lobbyid)) ||
     pendingLobbies.find((lobby) => lobby.lobbyid === parseInt(lobbyid));
-  console.log(lobby);
   const { sports } = useSelector((state) => state.sports);
   const sport = sports.find(
     (sport) => sport.sportid === parseInt(lobby.sportid)
@@ -55,13 +54,20 @@ const DetailedLobbyCard = ({ type }) => {
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
   const [isExitDialogOpen, setIsExitDialogOpen] = useState(false);
   const [isAddUserDialogOpen, setIsAddUserDialogOpen] = useState(false);
+  const [isConcludeOpen, setIsConcludeOpen] = useState(false);
   const [inputUsername, setInputUsername] = useState("");
   const [isInactiveDialogOpen, setIsInactiveDialogOpen] = useState(false);
   const [users, setUsers] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [winnerScore, setWinnerScore] = useState("");
+  const [loserScore, setLoserScore] = useState("");
+  const [winnerComments, setWinnerComments] = useState("");
+  const [winners, setWinners] = useState([]);
 
   const openJoinDialog = () => setIsJoinDialogOpen(true);
   const closeJoinDialog = () => setIsJoinDialogOpen(false);
+  const openConcludeDialog = () => setIsConcludeOpen(true);
+  const closeConcludeDialog = () => setIsConcludeOpen(false);
   const openErrorDialog = () => setIsErrorDialogOpen(true);
   const closeErrorDialog = () => setIsErrorDialogOpen(false);
   const openExitDialog = () => setIsExitDialogOpen(true);
@@ -92,6 +98,14 @@ const DetailedLobbyCard = ({ type }) => {
   useEffect(() => {
     fetchLobbyUsers();
   }, [lobbyid]);
+
+  const toggleWinner = (user) => {
+    if (winners.find((winner) => winner === user.userid)) {
+      setWinners(winners.filter((winner) => winner !== user.userid));
+    } else {
+      setWinners([...winners, user.userid]);
+    }
+  };
 
   const handleJoinLobby = async () => {
     try {
@@ -127,7 +141,7 @@ const DetailedLobbyCard = ({ type }) => {
 
   const handleExitLobby = async () => {
     try {
-      await axios.put(`/lobbies/exit`);
+      await axios.put(`/lobbies/exit`, { userId: user.userid });
       dispatch(updateUser({ activelobby: false, currentlobby: null }));
       closeExitDialog();
       navigate("/home");
@@ -147,6 +161,29 @@ const DetailedLobbyCard = ({ type }) => {
       navigate("/home");
     } catch (error) {
       setErrorMessage("Unexpected error, Try Again!");
+      openErrorDialog();
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const losers = users
+        .filter((user) => !winners.includes(user.userid))
+        .map((user) => user.userid);
+      await axios.put(`/lobbies/updateWinners/${lobbyid}`, {
+        winnerids: winners,
+        loserids: losers,
+        winner_comments: winnerComments,
+        score: `${winnerScore}-${loserScore}`,
+      });
+      for (const user of users) {
+        await axios.put(`/lobbies/exit`, { userId: user.userid });
+        dispatch(updateUser({ activelobby: false, currentlobby: null }));
+      }
+      closeConcludeDialog();
+      navigate("/home");
+    } catch (error) {
+      setErrorMessage("Unexpected Error, Try Again!");
       openErrorDialog();
     }
   };
@@ -221,7 +258,7 @@ const DetailedLobbyCard = ({ type }) => {
               </button>
             ) : (
               <button
-                onClick={openJoinDialog}
+                onClick={openConcludeDialog}
                 className="flex-1 rounded-full bg-green-600 dark:bg-green-800 text-white dark:text-white antialiased font-bold hover:bg-green-800 dark:hover:bg-green-900 px-4 py-2"
               >
                 Conclude
@@ -348,7 +385,7 @@ const DetailedLobbyCard = ({ type }) => {
               <p>{errorMessage}</p>
             </div>
             <div className="flex justify-end mt-4 space-x-4">
-              {isAddUserDialogOpen ? (
+              {!isJoinDialogOpen ? (
                 <button
                   onClick={() => {
                     closeErrorDialog();
@@ -366,7 +403,7 @@ const DetailedLobbyCard = ({ type }) => {
                   }}
                   className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                  {isAddUserDialogOpen ? "Try Again" : "My Lobby"}
+                  My Lobby
                 </button>
               )}
               <button
@@ -383,12 +420,101 @@ const DetailedLobbyCard = ({ type }) => {
         </div>
       </Dialog>
 
+      <Dialog open={isConcludeOpen} onClose={closeConcludeDialog}>
+        <div className="fixed inset-0 bg-black bg-opacity-30" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="mx-auto max-w-md rounded bg-white p-6 shadow-lg">
+            <Dialog.Title className="text-lg font-bold">
+              Conclude Match
+            </Dialog.Title>
+            <div className="mt-4">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Winner Score
+                </label>
+                <input
+                  type="number"
+                  value={winnerScore}
+                  onChange={(e) => setWinnerScore(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Loser Score
+                </label>
+                <input
+                  type="number"
+                  value={loserScore}
+                  onChange={(e) => setLoserScore(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Winner Comments
+                </label>
+                <textarea
+                  value={winnerComments}
+                  onChange={(e) => setWinnerComments(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Select Winners
+                </label>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      onClick={() => toggleWinner(user)}
+                      className={`cursor-pointer p-2 rounded-lg flex items-center space-x-2 ${
+                        winners.includes(user.userid)
+                          ? "bg-blue-100"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      <img
+                        src={`http://localhost:3010/${user.profile_pic.replace(
+                          /\\/g,
+                          "/"
+                        )}`}
+                        alt={user.username}
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <span className="text-sm font-medium">
+                        {user.username}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end mt-4 space-x-4">
+                <button
+                  onClick={handleSubmit}
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                  Submit
+                </button>
+                <button
+                  onClick={closeConcludeDialog}
+                  className="bg-gray-500 text-white px-4 py-2 rounded"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
       <Dialog open={isInactiveDialogOpen} onClose={closeInactiveDialog}>
         <div className="fixed inset-0 bg-black bg-opacity-30" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="mx-auto max-w-md rounded bg-white p-6 shadow-lg">
             <Dialog.Title className="text-lg font-bold">
-              Exit Lobby
+              Lobby Status
             </Dialog.Title>
             <div className="mt-4">
               <p>
